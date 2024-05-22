@@ -7,10 +7,13 @@ import { timeStamp, addDoc, collection, doc, serverTimestamp, setDoc } from "fir
 import { auth, db, storage } from "../../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { useNavigate } from "react-router-dom";
 
 const New = ({ inputs, title }) => {
   const [file, setFile] = useState("");
   const [data, setData] = useState({});
+  const [per, setPerc] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const uploadFile = () => {
@@ -24,6 +27,7 @@ const New = ({ inputs, title }) => {
         (snapshot) => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           console.log('Upload is ' + progress + '% done');
+          setPerc(progress)
           switch (snapshot.state) {
             case 'paused':
               console.log('Upload is paused');
@@ -48,6 +52,8 @@ const New = ({ inputs, title }) => {
     file && uploadFile();
   },[file]);
 
+  console.log(data)
+
   const handleInput = (e) => {
     const id = e.target.id;
     const value = e.target.value;
@@ -67,6 +73,7 @@ const New = ({ inputs, title }) => {
         ...data,
         timeStamp: serverTimestamp(),
       });
+      navigate(-1)
     } catch (err) {
       console.log(err);
     }
@@ -116,7 +123,9 @@ const New = ({ inputs, title }) => {
                   />
                 </div>
               ))}
-              <button type="submit">Send</button>
+              <button disabled={per !== null && per < 100} type="submit">
+                Send
+              </button>
             </form>
           </div>
         </div>
